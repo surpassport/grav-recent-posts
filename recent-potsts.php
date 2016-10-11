@@ -41,8 +41,8 @@ class ArchivesPlugin extends Plugin
             return;
         }
 
-        $this->month_taxonomy_name = $this->config->get('plugins.archives.taxonomy_names.month');
-        $this->year_taxonomy_name = $this->config->get('plugins.archives.taxonomy_names.year');
+        $this->month_taxonomy_name = $this->config->get('plugins.recent-posts.taxonomy_names.month');
+        $this->year_taxonomy_name = $this->config->get('plugins.recent-posts.taxonomy_names.year');
 
         // Dynamically add the needed taxonomy types to the taxonomies config
         $taxonomy_config = array_merge((array)$this->config->get('site.taxonomies'), [$this->month_taxonomy_name, $this->year_taxonomy_name]);
@@ -96,7 +96,7 @@ class ArchivesPlugin extends Plugin
         $page = $this->grav['page'];
         // If a page exists merge the configs
         if ($page) {
-            $this->config->set('plugins.archives', $this->mergeConfig($page));
+            $this->config->set('plugins.recent-posts', $this->mergeConfig($page));
         }
 
         /** @var Taxonomy $taxonomy_map */
@@ -112,8 +112,8 @@ class ArchivesPlugin extends Plugin
         $archives = array();
 
         // get the plugin filters setting
-        $filters = (array) $this->config->get('plugins.archives.filters');
-        $operator = $this->config->get('plugins.archives.filter_combinator');
+        $filters = (array) $this->config->get('plugins.recent-posts.filters');
+        $operator = $this->config->get('plugins.recent-posts.filter_combinator');
         $new_approach = false;
         $collection = null;
 
@@ -148,8 +148,8 @@ class ArchivesPlugin extends Plugin
         }
 
         // reorder the collection based on settings
-        $collection = $collection->order($this->config->get('plugins.archives.order.by'), $this->config->get('plugins.archives.order.dir'));
-        $date_format = $this->config->get('plugins.archives.date_display_format');
+        $collection = $collection->order($this->config->get('plugins.recent-posts.order.by'), $this->config->get('plugins.recent-posts.order.dir'));
+        $date_format = $this->config->get('plugins.recent-posts.date_display_format');
 
         // loop over new collection of pages that match filters
         foreach ($collection as $page) {
@@ -160,10 +160,10 @@ class ArchivesPlugin extends Plugin
         }
 
         // slice the array to the limit you want
-        $archives = array_slice($archives, 0, intval($this->config->get('plugins.archives.limit')), is_string(reset($archives)) ? false : true );
+        $archives = array_slice($archives, 0, intval($this->config->get('plugins.recent-posts.limit')), is_string(reset($archives)) ? false : true );
 
         // add the archives_start date to the twig variables
-        $this->grav['twig']->twig_vars['archives_show_count'] = $this->config->get('plugins.archives.show_count');
+        $this->grav['twig']->twig_vars['archives_show_count'] = $this->config->get('plugins.recent-posts.show_count');
         $this->grav['twig']->twig_vars['archives_data'] = $archives;
     }
 }
