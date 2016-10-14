@@ -9,8 +9,7 @@ use Grav\Common\Debugger;
 use Grav\Common\Taxonomy;
 use RocketTheme\Toolbox\Event\Event;
 
-class ArchivesPlugin extends Plugin
-{
+class RecentPostsPlugin extends Plugin {
     /**
      * @var string
      */
@@ -24,8 +23,7 @@ class ArchivesPlugin extends Plugin
     /**
      * @return array
      */
-    public static function getSubscribedEvents()
-    {
+    public static function getSubscribedEvents() {
         return [
             'onPluginsInitialized' => ['onPluginsInitialized', 0]
         ];
@@ -34,8 +32,7 @@ class ArchivesPlugin extends Plugin
     /**
      * Initialize configuration
      */
-    public function onPluginsInitialized()
-    {
+    public function onPluginsInitialized() {
         if ($this->isAdmin()) {
             $this->active = false;
             return;
@@ -58,8 +55,7 @@ class ArchivesPlugin extends Plugin
     /**
      * Add current directory to twig lookup paths.
      */
-    public function onTwigTemplatePaths()
-    {
+    public function onTwigTemplatePaths() {
         $this->grav['twig']->twig_paths[] = __DIR__ . '/templates';
     }
 
@@ -68,8 +64,7 @@ class ArchivesPlugin extends Plugin
      *
      * @param Event $event
      */
-    public function onPageProcessed(Event $event)
-    {
+    public function onPageProcessed(Event $event) {
         // Get the page header
         $page = $event['page'];
         $taxonomy = $page->taxonomy();
@@ -91,8 +86,7 @@ class ArchivesPlugin extends Plugin
     /**
      * Set needed variables to display breadcrumbs.
      */
-    public function onTwigSiteVariables()
-    {
+    public function onTwigSiteVariables() {
         $page = $this->grav['page'];
         // If a page exists merge the configs
         if ($page) {
@@ -104,21 +98,29 @@ class ArchivesPlugin extends Plugin
         $taxonomies = [];
         $find_taxonomy = [];
 
-        $pages = $this->grav['pages'];
-
         // Get current datetime
         $start_date = time();
 
-        $archives = array();
+        $recent_posts = array();
 
         // get the plugin filters setting
-        $filters = (array) $this->config->get('plugins.recent-posts.filters');
+        $filters = (array)$this->config->get('plugins.recent-posts.filters');
         $operator = $this->config->get('plugins.recent-posts.filter_combinator');
         $new_approach = false;
         $collection = null;
 
-        if ( ! $filters || (count($filters) == 1 && !reset($filters))){
-            $collection = $pages->all();
+        $relevant_pages = $this->grav['pages']->all();
+        if (count($filters['page']) > 0) {
+            $relevant_pages = new Collection();
+            foreach ($filters['page'] as $p) {
+                $children = $this->grav['pages']->find($p)->children();
+                $relevant_pages->append($children);
+            }
+            unset($filters['page']);
+        }
+
+        if (!$filters || (count($filters) == 1 && !reset($filters))) {
+            $collection = $relevant_pages;
         } else {
             foreach ($filters as $key => $filter) {
                 // flatten item if it's wrapped in an array
@@ -134,17 +136,21 @@ class ArchivesPlugin extends Plugin
                 if ($key === '@self' || $key === 'self@') {
                     $new_approach = true;
                 } elseif ($key === '@taxonomy' || $key === 'taxonomy@') {
-                    $taxonomies = $filter === false ? false : array_merge($taxonomies, (array) $filter);
+                    $taxonomies = $filter === false ? false : array_merge($taxonomies, (array)$filter);
                 } else {
                     $find_taxonomy[$key] = $filter;
                 }
             }
             if ($new_approach) {
-                $collection = $page->children();
+                $collectionTmp = $page->children();
             } else {
-                $collection = new Collection();
-                $collection->append($taxonomy_map->findTaxonomy($find_taxonomy, $operator)->toArray());
+                $collectionTmp = new Collection();
+                $collectionTmp->append($taxonomy_map->findTaxonomy($find_taxonomy, $operator)->toArray());
             }
+            // Connect the filtered pages/taxonomies using OR
+            $collection = $relevant_pages->append($collectionTmp);
+            // TODO: Allow to connect them using AND
+            // TODO: (therefore we need to find out if there is a way of filtering collections)
         }
 
         // reorder the collection based on settings
@@ -156,14 +162,13 @@ class ArchivesPlugin extends Plugin
             // update the start date if the page date is older
             $start_date = $page->date() < $start_date ? $page->date() : $start_date;
 
-            $archives[date($date_format, $page->date())][] = $page;
+            $recent_posts[] = $page;
         }
 
         // slice the array to the limit you want
-        $archives = array_slice($archives, 0, intval($this->config->get('plugins.recent-posts.limit')), is_string(reset($archives)) ? false : true );
+        $recent_posts = array_slice($recent_posts, 0, intval($this->config->get('plugins.recent-posts.limit')), is_string(reset($recent_posts)) ? false : true);
 
         // add the archives_start date to the twig variables
-        $this->grav['twig']->twig_vars['archives_show_count'] = $this->config->get('plugins.recent-posts.show_count');
-        $this->grav['twig']->twig_vars['archives_data'] = $archives;
+        $this->grav['twig']->twig_vars['recent_posts'] = $recent_posts;
     }
 }
