@@ -1,7 +1,7 @@
 name: Recent Posts
-version: 0.1
+version: 1.0
 description: Displays a list of the most recent blogs posts in a sidebar widget.
-icon: clock
+icon: clock-o
 author:
   name: Pius Ladenburger
   email: info@pius-ladenburger.de
@@ -49,17 +49,6 @@ form:
         'd-m-y': "01-01-14"
         'jS M Y': "10th Feb 2014"
 
-    show_count:
-      type: toggle
-      label: Show Count
-      highlight: 1
-      default: 1
-      options:
-        1: PLUGIN_ADMIN.ENABLED
-        0: PLUGIN_ADMIN.DISABLED
-      validate:
-        type: bool
-
     limit:
       type: text
       size: x-small
@@ -82,6 +71,7 @@ form:
       size: medium
       classes: fancy
       label: Order Type
+      default: 'date'
       options:
         default: Default - based on folder name
         folder: Folder - based on prefix-less folder name
@@ -91,9 +81,17 @@ form:
     filters.category:
       type: selectize
       label: Category filter
-      help: Comma separated list of category names
+      help: Comma separated list of category names to be filtered for
       validate:
         type: commalist
+
+    filters.page:
+        type: pages
+        label: Page filter
+        help: Comma separated list of pages to be filtered for
+        multiple: true
+        validate:
+          type: commalist
 
     filter_combinator:
       type: select
