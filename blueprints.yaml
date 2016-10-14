@@ -1,15 +1,14 @@
-name: Archives
-version: 1.5.0
-description: The **Archives** plugin creates links for pages grouped by month/year
-icon: university
+name: Recent Posts
+version: 1.0
+description: Displays a list of the most recent blogs posts in a sidebar widget.
+icon: clock-o
 author:
-  name: Team Grav
-  email: devs@getgrav.org
-  url: http://getgrav.org
-homepage: https://github.com/getgrav/grav-plugin-archives
-demo: http://demo.getgrav.org/blog-skeleton
-keywords: archives, plugin, blog, month, year, date, navigation, history
-bugs: https://github.com/getgrav/grav-plugin-archives/issues
+  name: Pius Ladenburger
+  email: info@pius-ladenburger.de
+  url: https://pius-ladenburger.de
+homepage: https://github.com/GittiHab/grav-recent-posts
+keywords: recent-posts, plugin, blog, month, year, date, navigation, sidebar
+bugs: https://github.com/GittiHab/grav-recent-posts/issues
 license: MIT
 
 form:
@@ -50,17 +49,6 @@ form:
         'd-m-y': "01-01-14"
         'jS M Y': "10th Feb 2014"
 
-    show_count:
-      type: toggle
-      label: Show Count
-      highlight: 1
-      default: 1
-      options:
-        1: PLUGIN_ADMIN.ENABLED
-        0: PLUGIN_ADMIN.DISABLED
-      validate:
-        type: bool
-
     limit:
       type: text
       size: x-small
@@ -83,6 +71,7 @@ form:
       size: medium
       classes: fancy
       label: Order Type
+      default: 'date'
       options:
         default: Default - based on folder name
         folder: Folder - based on prefix-less folder name
@@ -92,9 +81,17 @@ form:
     filters.category:
       type: selectize
       label: Category filter
-      help: Comma separated list of category names
+      help: Comma separated list of category names to be filtered for
       validate:
         type: commalist
+
+    filters.page:
+        type: pages
+        label: Page filter
+        help: Comma separated list of pages to be filtered for
+        multiple: true
+        validate:
+          type: commalist
 
     filter_combinator:
       type: select
