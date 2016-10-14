@@ -6,9 +6,9 @@ author:
   name: Pius Ladenburger
   email: info@pius-ladenburger.de
   url: https://pius-ladenburger.de
-homepage: https://github.com/somewhere
+homepage: https://github.com/GittiHab/grav-recent-posts
 keywords: recent-posts, plugin, blog, month, year, date, navigation, sidebar
-bugs: https://github.com/issues
+bugs: https://github.com/GittiHab/grav-recent-posts/issues
 license: MIT
 
 form:
