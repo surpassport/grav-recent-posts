@@ -1,6 +1,6 @@
 Recent Posts Plugin for Grav
 ======
-Based on the `Archives` Plugin, this plugin lists the most recents posts from your Grav Blog.
+Based on the `Archives` Plugin, this plugin lists the most recent posts from your Grav Blog.
 
 ## Settings
 * Select the pages where your blogs posts are listed – only their child pages will be shown
