@@ -109,8 +109,8 @@ class RecentPostsPlugin extends Plugin {
         $new_approach = false;
         $collection = null;
 
-        $relevant_pages = $this->grav['pages']->all();
-        if (count($filters['page']) > 0) {
+        $relevant_pages = null;
+        if (isset($filters['page']) && count($filters['page']) > 0) {
             $relevant_pages = new Collection();
             foreach ($filters['page'] as $p) {
                 $children = $this->grav['pages']->find($p)->children();
@@ -119,8 +119,8 @@ class RecentPostsPlugin extends Plugin {
             unset($filters['page']);
         }
 
-        if (!$filters || (count($filters) == 1 && !reset($filters))) {
-            $collection = $relevant_pages;
+        if (!isset($filters['category']) || count($filters['category']) < 1) {
+            $collection = (is_null($relevant_pages))? $this->grav['pages']->all():$relevant_pages;
         } else {
             foreach ($filters as $key => $filter) {
                 // flatten item if it's wrapped in an array
@@ -142,13 +142,14 @@ class RecentPostsPlugin extends Plugin {
                 }
             }
             if ($new_approach) {
-                $collectionTmp = $page->children();
+                $collection = $page->children();
             } else {
-                $collectionTmp = new Collection();
-                $collectionTmp->append($taxonomy_map->findTaxonomy($find_taxonomy, $operator)->toArray());
+                $collection = new Collection();
+                $collection->append($taxonomy_map->findTaxonomy($find_taxonomy, $operator)->toArray());
             }
             // Connect the filtered pages/taxonomies using OR
-            $collection = $relevant_pages->append($collectionTmp);
+            if (!is_null($relevant_pages))
+                $collection = $relevant_pages->append($collection);
             // TODO: Allow to connect them using AND
             // TODO: (therefore we need to find out if there is a way of filtering collections)
         }
