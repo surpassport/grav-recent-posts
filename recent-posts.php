@@ -38,13 +38,6 @@ class RecentPostsPlugin extends Plugin {
             return;
         }
 
-        $this->month_taxonomy_name = $this->config->get('plugins.recent-posts.taxonomy_names.month');
-        $this->year_taxonomy_name = $this->config->get('plugins.recent-posts.taxonomy_names.year');
-
-        // Dynamically add the needed taxonomy types to the taxonomies config
-        $taxonomy_config = array_merge((array)$this->config->get('site.taxonomies'), [$this->month_taxonomy_name, $this->year_taxonomy_name]);
-        $this->config->set('site.taxonomies', $taxonomy_config);
-
         $this->enable([
             'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
             'onPageProcessed' => ['onPageProcessed', 0],
@@ -65,22 +58,7 @@ class RecentPostsPlugin extends Plugin {
      * @param Event $event
      */
     public function onPageProcessed(Event $event) {
-        // Get the page header
-        $page = $event['page'];
-        $taxonomy = $page->taxonomy();
-
-        // track month taxonomy in "jan_2015" format:
-        if (!isset($taxonomy[$this->month_taxonomy_name])) {
-            $taxonomy[$this->month_taxonomy_name] = array(strtolower(date('M_Y', $page->date())));
-        }
-
-        // track year taxonomy in "2015" format:
-        if (!isset($taxonomy[$this->year_taxonomy_name])) {
-            $taxonomy[$this->year_taxonomy_name] = array(date('Y', $page->date()));
-        }
-
-        // set the modified taxonomy back on the page object
-        $page->taxonomy($taxonomy);
+        // Nothing to do here :)
     }
 
     /**
