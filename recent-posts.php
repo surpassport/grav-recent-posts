@@ -38,13 +38,6 @@ class RecentPostsPlugin extends Plugin {
             return;
         }
 
-        $this->month_taxonomy_name = $this->config->get('plugins.recent-posts.taxonomy_names.month');
-        $this->year_taxonomy_name = $this->config->get('plugins.recent-posts.taxonomy_names.year');
-
-        // Dynamically add the needed taxonomy types to the taxonomies config
-        $taxonomy_config = array_merge((array)$this->config->get('site.taxonomies'), [$this->month_taxonomy_name, $this->year_taxonomy_name]);
-        $this->config->set('site.taxonomies', $taxonomy_config);
-
         $this->enable([
             'onTwigTemplatePaths' => ['onTwigTemplatePaths', 0],
             'onPageProcessed' => ['onPageProcessed', 0],
@@ -65,22 +58,7 @@ class RecentPostsPlugin extends Plugin {
      * @param Event $event
      */
     public function onPageProcessed(Event $event) {
-        // Get the page header
-        $page = $event['page'];
-        $taxonomy = $page->taxonomy();
-
-        // track month taxonomy in "jan_2015" format:
-        if (!isset($taxonomy[$this->month_taxonomy_name])) {
-            $taxonomy[$this->month_taxonomy_name] = array(strtolower(date('M_Y', $page->date())));
-        }
-
-        // track year taxonomy in "2015" format:
-        if (!isset($taxonomy[$this->year_taxonomy_name])) {
-            $taxonomy[$this->year_taxonomy_name] = array(date('Y', $page->date()));
-        }
-
-        // set the modified taxonomy back on the page object
-        $page->taxonomy($taxonomy);
+        // Nothing to do here :)
     }
 
     /**
@@ -109,8 +87,8 @@ class RecentPostsPlugin extends Plugin {
         $new_approach = false;
         $collection = null;
 
-        $relevant_pages = $this->grav['pages']->all();
-        if (count($filters['page']) > 0) {
+        $relevant_pages = null;
+        if (isset($filters['page']) && count($filters['page']) > 0) {
             $relevant_pages = new Collection();
             foreach ($filters['page'] as $p) {
                 $children = $this->grav['pages']->find($p)->children();
@@ -119,8 +97,8 @@ class RecentPostsPlugin extends Plugin {
             unset($filters['page']);
         }
 
-        if (!$filters || (count($filters) == 1 && !reset($filters))) {
-            $collection = $relevant_pages;
+        if (!isset($filters['category']) || count($filters['category']) < 1) {
+            $collection = (is_null($relevant_pages))? $this->grav['pages']->all():$relevant_pages;
         } else {
             foreach ($filters as $key => $filter) {
                 // flatten item if it's wrapped in an array
@@ -142,13 +120,14 @@ class RecentPostsPlugin extends Plugin {
                 }
             }
             if ($new_approach) {
-                $collectionTmp = $page->children();
+                $collection = $page->children();
             } else {
-                $collectionTmp = new Collection();
-                $collectionTmp->append($taxonomy_map->findTaxonomy($find_taxonomy, $operator)->toArray());
+                $collection = new Collection();
+                $collection->append($taxonomy_map->findTaxonomy($find_taxonomy, $operator)->toArray());
             }
             // Connect the filtered pages/taxonomies using OR
-            $collection = $relevant_pages->append($collectionTmp);
+            if (!is_null($relevant_pages))
+                $collection = $relevant_pages->append($collection);
             // TODO: Allow to connect them using AND
             // TODO: (therefore we need to find out if there is a way of filtering collections)
         }

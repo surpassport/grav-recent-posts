@@ -6,7 +6,6 @@ order:
     by: date
     dir: desc
 filter_combinator: and
-taxonomy_names:
-    month: archives_month
-    year: archives_year
-
+filters:
+  category:
+  page:
