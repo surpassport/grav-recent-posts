@@ -1,5 +1,5 @@
 name: Recent Posts
-version: 1.0
+version: 1.0.0
 description: Displays a list of the most recent blogs posts in a sidebar widget.
 icon: clock-o
 author:
